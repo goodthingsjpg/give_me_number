@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>班級任務集章小幫手 - 多班級視覺化追蹤</title>
+  
+  <!-- Tailwind CSS & Font Awesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Google Fonts for diverse visual themes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Press+Start+2P&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Theme 1: 溫暖手繪犬 (Default) */
+    :root {
+      --bg-main: #fcf8f2;
+      --card-bg: #ffffff;
+      --card-border: #e8ded1;
+      --text-main: #5a4b41;
+      --text-sub: #8c7a6b;
+      --primary: #e07a5f;
+      --primary-hover: #d0694e;
+      --primary-light: #f4f1de;
+      --progress-bg: #e2d7cd;
+      --progress-fill: #81b29a;
+      --seat-bg: #f9f6f0;
+      --seat-border: #d8cebe;
+      --seat-color: #6b5c52;
+      --stamp-color: #d94e34;
+      --stamp-bg: rgba(217, 78, 52, 0.12);
+      --stamp-text: "閱";
+      --leave-color: #6c757d;
+      --font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+      --radius: 1rem;
+      --shadow: 0 10px 25px -5px rgba(90, 75, 65, 0.08);
+      --badge-bg: #f4a261;
+      --badge-color: #ffffff;
+    }
+
+    /* Theme 2: 像素闖關 (Pixel Game) */
+    [data-theme="pixel"] {
+      --bg-main: #181920;
+      --card-bg: #262936;
+      --card-border: #4f566b;
+      --text-main: #f0f3f8;
+      --text-sub: #a0a7b8;
+      --primary: #ff0055;
+      --primary-hover: #d90048;
+      --primary-light: #3d2338;
+      --progress-bg: #111217;
+      --progress-fill: #00ff66;
+      --seat-bg: #1e212b;
+      --seat-border: #4f566b;
+      --seat-color: #f0f3f8;
+      --stamp-color: #ff0055;
+      --stamp-bg: rgba(255, 0, 85, 0.2);
+      --stamp-text: "★";
+      --leave-color: #ffaa00;
+      --font-family: 'Press Start 2P', 'Noto Sans TC', monospace;
+      --radius: 0.25rem;
+      --shadow: 4px 4px 0px #000000;
+      --badge-bg: #9900ff;
+      --badge-color: #ffffff;
+    }
+
+    /* Theme 3: 黑板復古 (Chalkboard) */
+    [data-theme="chalkboard"] {
+      --bg-main: #1d3326;
+      --card-bg: #254031;
+      --card-border: #3f614d;
+      --text-main: #f0f7f2;
+      --text-sub: #a1c2b0;
+      --primary: #ff8c42;
+      --primary-hover: #e07530;
+      --primary-light: #304e3d;
+      --progress-bg: #15261c;
+      --progress-fill: #ffdd53;
+      --seat-bg: #1d3527;
+      --seat-border: #466e57;
+      --seat-color: #e2eee7;
+      --stamp-color: #ff5252;
+      --stamp-bg: rgba(255, 82, 82, 0.2);
+      --stamp-text: "OK";
+      --leave-color: #90a4ae;
+      --font-family: 'Noto Sans TC', sans-serif;
+      --radius: 0.75rem;
+      --shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.25);
+      --badge-bg: #e65100;
+      --badge-color: #ffffff;
+    }
+
+    /* Theme 4: 極簡無印 (Minimalist Paper) */
+    [data-theme="minimal"] {
+      --bg-main: #f4f4f6;
+      --card-bg: #ffffff;
+      --card-border: #e2e2e7;
+      --text-main: #1c1c1e;
+      --text-sub: #8e8e93;
+      --primary: #007aff;
+      --primary-hover: #0062cc;
+      --primary-light: #e5f1ff;
+      --progress-bg: #e5e5ea;
+      --progress-fill: #34c759;
+      --seat-bg: #fafafa;
+      --seat-border: #d1d1d6;
+      --seat-color: #1c1c1e;
+      --stamp-color: #ff3b30;
+      --stamp-bg: rgba(255, 59, 48, 0.12);
+      --stamp-text: "✓";
+      --leave-color: #8e8e93;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif;
+      --radius: 0.6rem;
+      --shadow: 0 4px 12px rgba(0,0,0,0.03);
+      --badge-bg: #8e8e93;
+      --badge-color: #ffffff;
+    }
+
+    /* Theme 5: 柔和馬卡龍 (Soft Macaron) */
+    [data-theme="macaron"] {
+      --bg-main: #f0f7f4;
+      --card-bg: #ffffff;
+      --card-border: #d8ece4;
+      --text-main: #4a6572;
+      --text-sub: #829b9f;
+      --primary: #ff9aa2;
+      --primary-hover: #e0838b;
+      --primary-light: #fff2f1;
+      --progress-bg: #e2f0d9;
+      --progress-fill: #b5ead7;
+      --seat-bg: #f7fcfa;
+      --seat-border: #c7e5d9;
+      --seat-color: #4a6572;
+      --stamp-color: #ff9aa2;
+      --stamp-bg: rgba(255, 154, 162, 0.2);
+      --stamp-text: "✿";
+      --leave-color: #829b9f;
+      --font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+      --radius: 1.25rem;
+      --shadow: 0 10px 25px rgba(181, 234, 215, 0.3);
+      --badge-bg: #ffdac1;
+      --badge-color: #5d4037;
+    }
+
+    /* Theme 6: 經典檔案夾 (Retro Folder) */
+    [data-theme="folder"] {
+      --bg-main: #d9c5b2;
+      --card-bg: #f4ebd9;
+      --card-border: #b89f88;
+      --text-main: #3d312a;
+      --text-sub: #736254;
+      --primary: #8c2d19;
+      --primary-hover: #732312;
+      --primary-light: #e6dad0;
+      --progress-bg: #d0c0b0;
+      --progress-fill: #597057;
+      --seat-bg: #ebdcc9;
+      --seat-border: #b89f88;
+      --seat-color: #3d312a;
+      --stamp-color: #a62b1f;
+      --stamp-bg: rgba(166, 43, 31, 0.15);
+      --stamp-text: "過";
+      --leave-color: #7d6b5d;
+      --font-family: Georgia, 'Times New Roman', 'Noto Sans TC', serif;
+      --radius: 0.375rem;
+      --shadow: 0 6px 14px rgba(61, 49, 42, 0.15);
+      --badge-bg: #736254;
+      --badge-color: #ffffff;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .themed-card {
+      background-color: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .themed-btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-radius: var(--radius);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .themed-btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .themed-btn-sub {
+      background-color: var(--seat-bg);
+      border: 1.5px solid var(--seat-border);
+      color: var(--text-main);
+      border-radius: var(--radius);
+    }
+    .themed-btn-sub:hover {
+      background-color: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    /* Dynamic Stamp Appearance */
+    .stamp-mark {
+      border: 2.5px solid var(--stamp-color);
+      color: var(--stamp-color);
+      background-color: var(--card-bg);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+
+    @keyframes stampPop {
+      0% { transform: scale(1.6) rotate(-25deg); opacity: 0; }
+      50% { transform: scale(0.9) rotate(-10deg); opacity: 1; }
+      100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+    }
+    .animate-stamp-pop {
+      animation: stampPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: var(--seat-bg);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--seat-border);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-full min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- Confetti Canvas Overlay -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- Custom Modal Container -->
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden transition-opacity opacity-0 flex items-center justify-center p-4">
+    <div id="modalBox" class="themed-card max-w-xl w-full p-6 transform scale-95 transition-transform overflow-hidden max-h-[92vh] flex flex-col">
+      <!-- Dynamic Content Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Fullscreen Focus Mode Overlay (Big Screen Mode) -->
+  <div id="focusModalBackdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-40 hidden transition-opacity opacity-0 flex items-center justify-center p-4 sm:p-8">
+    <div id="focusModalBox" class="themed-card max-w-5xl w-full h-full max-h-[94vh] flex flex-col p-6 sm:p-8 overflow-hidden transform scale-95 transition-transform">
+      <!-- Dynamic Focus Content Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="sticky top-0 z-30 border-b border-black/5 bg-opacity-90 backdrop-blur-md" style="background-color: var(--card-bg); border-color: var(--card-border);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md" style="background-color: var(--primary);">
+          <i class="fa-solid fa-stamp text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-black text-base sm:text-lg tracking-tight leading-tight" style="color: var(--text-main);">班級任務集章牆</h1>
+          <p class="text-xs hidden md:block opacity-75" style="color: var(--text-sub);">多班級切換 • 正向闖關與親師溝通助手</p>
+        </div>
+      </div>
+
+      <!-- Controls & Multi-Class Selector -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
+        
+        <!-- Multi-Class Selector -->
+        <div class="relative flex items-center">
+          <select id="classSelector" onchange="switchClass(this.value)" class="themed-btn-sub px-3 py-1.5 text-xs sm:text-sm font-black focus:outline-none cursor-pointer border-2" style="border-color: var(--primary);">
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+
+        <!-- Display Mode Toggle -->
+        <div class="relative flex items-center">
+          <select id="displayModeSelector" onchange="switchDisplayMode(this.value)" class="themed-btn-sub px-2.5 py-1.5 text-xs sm:text-sm font-bold focus:outline-none cursor-pointer" title="切換座號與姓名放大顯示模式">
+            <option value="both">🔢+👤 座號與姓名</option>
+            <option value="numOnly">🔢 僅座號（特大字）</option>
+            <option value="nameOnly">👤 僅姓名（特大字）</option>
+          </select>
+        </div>
+
+        <!-- Theme Switcher Selector -->
+        <div class="relative flex items-center">
+          <select id="themeSelector" onchange="switchTheme(this.value)" class="themed-btn-sub px-2.5 py-1.5 text-xs sm:text-sm font-bold focus:outline-none cursor-pointer">
+            <option value="dog">🐶 溫暖手繪犬</option>
+            <option value="pixel">⚔️ 像素闖關</option>
+            <option value="chalkboard">🖍️ 黑板復古</option>
+            <option value="minimal">🤍 極簡無印</option>
+            <option value="macaron">🩵 柔和馬卡龍</option>
+            <option value="folder">📑 經典檔案夾</option>
+          </select>
+        </div>
+
+        <!-- Sound Effect Toggle Button -->
+        <button id="soundToggleBtn" onclick="toggleSound()" class="themed-btn-sub px-2.5 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-1.5">
+          <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+          <span id="soundLabel" class="hidden lg:inline">音效：開啟</span>
+        </button>
+
+        <!-- Export & Report Center Modal Button -->
+        <button onclick="openExportModal()" class="themed-btn-sub px-2.5 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-1.5" title="匯出 Excel/CSV 表格與親師報告">
+          <i class="fa-solid fa-file-export"></i>
+          <span class="hidden sm:inline">匯出與報告</span>
+        </button>
+
+        <!-- Class Roster & Class Management Button -->
+        <button onclick="openClassManageModal()" class="themed-btn-sub px-2.5 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-1.5" title="管理班級名單與新增班級">
+          <i class="fa-solid fa-users-gear"></i>
+          <span class="hidden sm:inline">班級名單</span>
+        </button>
+
+        <!-- Add New Task Button -->
+        <button onclick="openAddTaskModal()" class="themed-btn-primary px-3 py-1.5 text-xs sm:text-sm font-black flex items-center gap-1.5 active:scale-95 shadow-md">
+          <i class="fa-solid fa-plus"></i>
+          <span>新增任務</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+    <!-- Dashboard Bar -->
+    <div class="themed-card p-4 sm:p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      
+      <!-- Current Active Class Statistics summary -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="rounded-xl px-4 py-2 text-center min-w-[100px]" style="background-color: var(--seat-bg); border: 1px solid var(--seat-border);">
+          <span class="block text-[10px] font-bold uppercase tracking-wider opacity-70">當前班級</span>
+          <span id="statCurrentClassName" class="text-base sm:text-lg font-black truncate max-w-[130px]" style="color: var(--primary);">801 班</span>
+        </div>
+        <div class="rounded-xl px-4 py-2 text-center min-w-[90px]" style="background-color: var(--seat-bg); border: 1px solid var(--seat-border);">
+          <span class="block text-[10px] font-bold uppercase tracking-wider opacity-70">進行中任務</span>
+          <span id="statActiveTasks" class="text-xl sm:text-2xl font-black" style="color: var(--primary);">0</span>
+        </div>
+        <div class="rounded-xl px-4 py-2 text-center min-w-[90px]" style="background-color: var(--seat-bg); border: 1px solid var(--seat-border);">
+          <span class="block text-[10px] font-bold uppercase tracking-wider opacity-70">班級完成率</span>
+          <span id="statOverallCompletion" class="text-xl sm:text-2xl font-black" style="color: var(--progress-fill);">0%</span>
+        </div>
+        <div class="hidden lg:flex flex-col">
+          <span class="text-xs font-bold opacity-60">班級員額</span>
+          <span id="statRosterCount" class="text-sm font-extrabold">30 人</span>
+        </div>
+      </div>
+
+      <!-- Task Filter Tabs -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl self-start md:self-auto text-xs font-bold" style="background-color: var(--seat-bg);">
+        <button id="filterAll" onclick="setFilter('all')" class="px-3 py-1.5 rounded-lg font-black transition" style="background-color: var(--card-bg);">全部任務</button>
+        <button id="filterSingle" onclick="setFilter('single')" class="px-3 py-1.5 rounded-lg opacity-70 hover:opacity-100 transition">獨立任務</button>
+        <button id="filterPipeline" onclick="setFilter('pipeline')" class="px-3 py-1.5 rounded-lg opacity-70 hover:opacity-100 transition">連續任務 (流程)</button>
+      </div>
+
+    </div>
+
+    <!-- Instruction Guide Banner -->
+    <div id="guideBanner" class="rounded-2xl p-4 flex items-start justify-between gap-3 text-xs sm:text-sm" style="background-color: var(--seat-bg); border: 1px solid var(--seat-border);">
+      <div class="flex gap-3">
+        <i class="fa-solid fa-lightbulb text-amber-500 text-base sm:text-lg mt-0.5"></i>
+        <div>
+          <p class="font-bold mb-0.5">💡 操作提示與多班級支援：</p>
+          <ul class="list-disc list-inside space-y-0.5 opacity-90">
+            <li><strong>班級切換</strong>：右上角可快速切換 801班、802班等，任務與學生名單會自動隔開。</li>
+            <li><strong>顯示模式</strong>：右上角可選擇「座號+姓名」、「僅座號（特大字）」或「僅姓名（特大字）」大螢幕更清楚！</li>
+            <li><strong>點擊 1 下蓋章</strong> ➔ <strong>點擊 2 下請假/免繳</strong>（自動排除統計分母）➔ <strong>點擊 3 下重置</strong>。</li>
+            <li><strong>📤 匯出與報告</strong>：隨時可產出 CSV 表格或產生單人親師對話卡！</li>
+          </ul>
+        </div>
+      </div>
+      <button onclick="dismissGuide()" class="opacity-50 hover:opacity-100 p-1">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Task Cards Container Grid -->
+    <div id="taskCardsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+      <!-- Task Cards injected dynamically -->
+    </div>
+
+    <!-- Empty Prompt -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-3 opacity-40" style="background-color: var(--seat-bg);">
+        <i class="fa-solid fa-clipboard-check"></i>
+      </div>
+      <h3 class="text-base font-bold mb-1">當前班級沒有建立任何任務</h3>
+      <p class="text-xs opacity-60 mb-4 max-w-sm">點擊右上角的「新增任務」按鈕，為此班級建立獨立任務或多階段連續流程。</p>
+      <button onclick="openAddTaskModal()" class="themed-btn-primary px-4 py-2 text-xs font-bold shadow-md">
+        <i class="fa-solid fa-plus mr-1"></i> 新增第一個任務
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t py-4 text-center text-xs opacity-50" style="border-color: var(--card-border);">
+    班級任務可視化追蹤系統 • 多班級支援 • 正向獎勵集章與親師溝通助手
+  </footer>
+
+  <script>
+    // Application State Variables with Multi-Class Support
+    let appState = {
+      soundEnabled: true,
+      currentTheme: 'dog',
+      displayMode: 'both', // 'both', 'numOnly', 'nameOnly'
+      activeFilter: 'all',
+      currentClassId: 'c1',
+      classes: [
+        {
+          id: 'c1',
+          name: '801 班',
+          maxSeats: 30,
+          studentNames: {
+            1: "王小明", 2: "陳美玲", 3: "張立偉", 4: "李怡君", 5: "黃家豪"
+          }
+        },
+        {
+          id: 'c2',
+          name: '802 班',
+          maxSeats: 28,
+          studentNames: {
+            1: "林志強", 2: "郭靜文", 3: "趙大為", 4: "許雅婷", 5: "鄭宇軒"
+          }
+        }
+      ],
+      tasks: []
+    };
+
+    // Helper: Current Time formatted (e.g., 07/21 18:15)
+    function getFormattedCurrentTime() {
+      const d = new Date();
+      const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(d.getDate()).padStart(2, '0');
+      const hoursStr = String(d.getHours()).padStart(2, '0');
+      const minsStr = String(d.getMinutes()).padStart(2, '0');
+      return `${monthStr}/${dayStr} ${hoursStr}:${minsStr}`;
+    }
+
+    // Default Sample Data Generator
+    function getDefaultSampleData() {
+      const nowStr = getFormattedCurrentTime();
+      return {
+        soundEnabled: true,
+        currentTheme: 'dog',
+        displayMode: 'both',
+        activeFilter: 'all',
+        currentClassId: 'c1',
+        classes: [
+          {
+            id: 'c1',
+            name: '801 班',
+            maxSeats: 30,
+            studentNames: {
+              1: "王小明", 2: "陳美玲", 3: "張立偉", 4: "李怡君", 5: "黃家豪"
+            }
+          },
+          {
+            id: 'c2',
+            name: '802 班',
+            maxSeats: 28,
+            studentNames: {
+              1: "林志強", 2: "郭靜文", 3: "趙大為", 4: "許雅婷", 5: "鄭宇軒"
+            }
+          }
+        ],
+        tasks: [
+          {
+            id: 'task_sample_1',
+            classId: 'c1',
+            title: '📄 校慶意願調查回條',
+            type: 'single',
+            stampText: '繳',
+            startTime: nowStr,
+            createdAt: Date.now(),
+            states: {
+              1: 'stamped', 2: 'stamped', 3: 'leave', 4: 'stamped', 5: 'none'
+            }
+          },
+          {
+            id: 'task_sample_2',
+            classId: 'c1',
+            title: '📘 小藍本作業闖關',
+            type: 'pipeline',
+            stampText: '閱',
+            startTime: nowStr,
+            createdAt: Date.now() - 5000,
+            stages: [
+              { id: 's1', name: '階段 1：第一次繳交' },
+              { id: 's2', name: '階段 2：錯題訂正' },
+              { id: 's3', name: '階段 3：二次複查' }
+            ],
+            currentStageIndex: 0,
+            pipelineStates: {
+              1: { s1: 'stamped', s2: 'stamped', s3: 'stamped' },
+              2: { s1: 'stamped', s2: 'stamped', s3: 'none' },
+              3: { s1: 'stamped', s2: 'none', s3: 'none' },
+              4: { s1: 'leave', s2: 'none', s3: 'none' },
+              5: { s1: 'none', s2: 'none', s3: 'none' }
+            }
+          },
+          {
+            id: 'task_sample_3',
+            classId: 'c2',
+            title: '✏️ 英文週考背誦複查',
+            type: 'single',
+            stampText: '過',
+            startTime: nowStr,
+            createdAt: Date.now() - 10000,
+            states: {
+              1: 'stamped', 2: 'none', 3: 'stamped'
+            }
+          }
+        ]
+      };
+    }
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let comboCount = 0;
+    let comboResetTimer = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type = 'stamp') {
+      if (!appState.soundEnabled) return;
+      initAudio();
+
+      clearTimeout(comboResetTimer);
+      comboCount++;
+      comboResetTimer = setTimeout(() => { comboCount = 0; }, 1200);
+
+      const now = audioCtx.currentTime;
+      const pitchOffset = Math.min((comboCount - 1) * 15, 120);
+
+      if (type === 'stamp') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160 + pitchOffset, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.08);
+
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.08);
+
+      } else if (type === 'leave') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.06);
+
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.06);
+
+      } else if (type === 'complete') {
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.35, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.4);
+        });
+      }
+    }
+
+    function triggerConfetti() {
+      playSound('complete');
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 120,
+          spread: 85,
+          origin: { y: 0.6 }
+        });
+      } else {
+        const canvas = document.getElementById('confettiCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
+        const particles = [];
+        for (let i = 0; i < 90; i++) {
+          particles.push({
+            x: canvas.width / 2, y: canvas.height / 2,
+            vx: (Math.random() - 0.5) * 16, vy: Math.random() * -14 - 4,
+            size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
+            opacity: 1, gravity: 0.3
+          });
+        }
+
+        function render() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let active = 0;
+          particles.forEach(p => {
+            if (p.opacity > 0) {
+              active++;
+              p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.opacity -= 0.01;
+              ctx.globalAlpha = Math.max(0, p.opacity);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(p.x, p.y, p.size, p.size);
+            }
+          });
+          if (active > 0) requestAnimationFrame(render);
+          else ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        render();
+      }
+    }
+
+    // LocalStorage Data Management
+    const STORAGE_KEY = 'classroom_task_stamp_tracker_v4_multiclass';
+
+    function loadSavedData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          appState = JSON.parse(raw);
+        } else {
+          appState = getDefaultSampleData();
+          saveData();
+        }
+      } catch (e) {
+        console.error('Failed to load storage:', e);
+        appState = getDefaultSampleData();
+      }
+
+      // Backward compatibility fixes
+      if (!appState.classes || appState.classes.length === 0) {
+        appState.classes = [
+          {
+            id: 'c1',
+            name: '預設班級',
+            maxSeats: appState.maxSeats || 30,
+            studentNames: appState.studentNames || {}
+          }
+        ];
+        appState.currentClassId = 'c1';
+      }
+      if (!appState.currentClassId) appState.currentClassId = appState.classes[0].id;
+      if (!appState.displayMode) appState.displayMode = 'both';
+      if (!appState.currentTheme) appState.currentTheme = 'dog';
+
+      // Assign classId to legacy tasks
+      if (appState.tasks) {
+        appState.tasks.forEach(t => {
+          if (!t.classId) t.classId = appState.currentClassId;
+        });
+      }
+
+      switchTheme(appState.currentTheme, false);
+      document.getElementById('themeSelector').value = appState.currentTheme;
+      document.getElementById('displayModeSelector').value = appState.displayMode;
+      updateClassSelectorDropdown();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error('Failed to save storage:', e);
+      }
+      renderApp();
+    }
+
+    function getCurrentClassObj() {
+      return appState.classes.find(c => c.id === appState.currentClassId) || appState.classes[0];
+    }
+
+    function switchClass(classId) {
+      if (classId === '__add_new_class__') {
+        openAddClassModal();
+        return;
+      }
+      appState.currentClassId = classId;
+      saveData();
+      showToast(`已切換至「${getCurrentClassObj().name}」`, 'info');
+    }
+
+    function switchDisplayMode(mode) {
+      appState.displayMode = mode;
+      saveData();
+    }
+
+    function switchTheme(themeKey, save = true) {
+      appState.currentTheme = themeKey;
+      if (themeKey === 'dog') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', themeKey);
+      }
+      if (save) saveData();
+    }
+
+    function updateClassSelectorDropdown() {
+      const select = document.getElementById('classSelector');
+      if (!select) return;
+
+      let html = '';
+      appState.classes.forEach(c => {
+        const isSel = c.id === appState.currentClassId ? 'selected' : '';
+        html += `<option value="${c.id}" ${isSel}>🏫 ${escapeHTML(c.name)}</option>`;
+      });
+      html += `<option value="__add_new_class__">➕ 新增班級...</option>`;
+      select.innerHTML = html;
+    }
+
+    function showModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const box = document.getElementById('modalBox');
+      backdrop.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.classList.remove('opacity-0');
+        box.classList.remove('scale-95');
+      });
+    }
+
+    function closeModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const box = document.getElementById('modalBox');
+      backdrop.classList.add('opacity-0');
+      box.classList.add('scale-95');
+      setTimeout(() => { backdrop.classList.add('hidden'); }, 200);
+      updateClassSelectorDropdown();
+    }
+
+    function showToast(msg, type = 'info', iconClass = null) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bg = 'bg-slate-800 text-white';
+      let defaultIcon = '<i class="fa-solid fa-circle-info text-amber-400"></i>';
+
+      if (type === 'success') {
+        bg = 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20';
+        defaultIcon = '<i class="fa-solid fa-circle-check text-emerald-200"></i>';
+      }
+      if (type === 'unlock') {
+        bg = 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20';
+        defaultIcon = '<i class="fa-solid fa-lock-open text-amber-300 animate-bounce"></i>';
+      }
+      if (type === 'warning') {
+        bg = 'bg-amber-600 text-white';
+        defaultIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      }
+      if (type === 'error') {
+        bg = 'bg-rose-600 text-white';
+        defaultIcon = '<i class="fa-solid fa-circle-xmark"></i>';
+      }
+
+      const icon = iconClass ? `<i class="${iconClass}"></i>` : defaultIcon;
+
+      toast.className = `px-4 py-3 rounded-xl text-xs sm:text-sm font-extrabold shadow-xl transition-all transform translate-y-3 opacity-0 flex items-center gap-2.5 pointer-events-auto border border-white/10 ${bg}`;
+      toast.innerHTML = `${icon} <span class="leading-snug">${msg}</span>`;
+      
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function dismissGuide() {
+      document.getElementById('guideBanner').classList.add('hidden');
+    }
+
+    function toggleSound() {
+      appState.soundEnabled = !appState.soundEnabled;
+      const icon = document.getElementById('soundIcon');
+      const label = document.getElementById('soundLabel');
+      if (appState.soundEnabled) {
+        icon.className = 'fa-solid fa-volume-high text-emerald-500';
+        label.innerText = '音效：開啟';
+        showToast('音效已開啟', 'success');
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark opacity-50';
+        label.innerText = '音效：靜音';
+        showToast('音效已設為靜音', 'info');
+      }
+      saveData();
+    }
+
+    function setFilter(filterType) {
+      appState.activeFilter = filterType;
+      ['All', 'Single', 'Pipeline'].forEach(type => {
+        const btn = document.getElementById('filter' + type);
+        if (type.toLowerCase() === filterType) {
+          btn.style.backgroundColor = 'var(--card-bg)';
+          btn.classList.add('font-black');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.style.backgroundColor = 'transparent';
+          btn.classList.remove('font-black');
+          btn.classList.add('opacity-70');
+        }
+      });
+      renderApp();
+    }
+
+    // Helper: Completion Percentage Calculation
+    function getTaskCompletionPercentage(task) {
+      const classObj = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+      const maxSeats = classObj.maxSeats || 30;
+
+      if (task.type === 'single') {
+        let stamped = 0;
+        let leave = 0;
+        for (let i = 1; i <= maxSeats; i++) {
+          const st = task.states?.[i] || 'none';
+          if (st === 'stamped') stamped++;
+          if (st === 'leave') leave++;
+        }
+        const denom = Math.max(1, maxSeats - leave);
+        return Math.round((stamped / denom) * 100);
+      } else {
+        const lastStage = task.stages[task.stages.length - 1];
+        let stamped = 0;
+        let leave = 0;
+        for (let i = 1; i <= maxSeats; i++) {
+          const pipe = task.pipelineStates?.[i] || {};
+          if (pipe[task.stages[0].id] === 'leave') leave++;
+          else if (pipe[lastStage.id] === 'stamped') stamped++;
+        }
+        const denom = Math.max(1, maxSeats - leave);
+        return Math.round((stamped / denom) * 100);
+      }
+    }
+
+    function renderApp() {
+      updateClassSelectorDropdown();
+      updateHeaderAndDashboard();
+      renderTaskCards();
+      if (currentFocusedTaskId) {
+        renderFocusModalContent();
+      }
+    }
+
+    function updateHeaderAndDashboard() {
+      const curClass = getCurrentClassObj();
+      const classTasks = appState.tasks.filter(t => t.classId === curClass.id);
+      
+      document.getElementById('statCurrentClassName').innerText = curClass.name;
+      document.getElementById('statActiveTasks').innerText = classTasks.length;
+      document.getElementById('statRosterCount').innerText = `${curClass.maxSeats} 人`;
+
+      if (classTasks.length === 0) {
+        document.getElementById('statOverallCompletion').innerText = '0%';
+        return;
+      }
+
+      let totalPercent = 0;
+      classTasks.forEach(t => {
+        totalPercent += getTaskCompletionPercentage(t);
+      });
+      const avgPercent = Math.round(totalPercent / classTasks.length);
+      document.getElementById('statOverallCompletion').innerText = `${avgPercent}%`;
+    }
+
+    function renderTaskCards() {
+      const container = document.getElementById('taskCardsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const curClass = getCurrentClassObj();
+
+      let visibleTasks = appState.tasks.filter(t => t.classId === curClass.id);
+      if (appState.activeFilter === 'single') {
+        visibleTasks = visibleTasks.filter(t => t.type === 'single');
+      } else if (appState.activeFilter === 'pipeline') {
+        visibleTasks = visibleTasks.filter(t => t.type === 'pipeline');
+      }
+
+      if (visibleTasks.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      emptyState.classList.remove('flex');
+
+      let html = '';
+      visibleTasks.forEach(task => {
+        if (task.type === 'single') {
+          html += createSingleTaskCardHTML(task);
+        } else {
+          html += createPipelineTaskCardHTML(task);
+        }
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Seat Inner Label Generator according to displayMode
+    function getSeatInnerLabelHTML(seatNum, studentName, isStampedOrLeave = false) {
+      const numStr = seatNum < 10 ? '0' + seatNum : seatNum;
+      const mode = appState.displayMode || 'both';
+
+      if (mode === 'numOnly') {
+        return `<span class="text-xs sm:text-sm font-black ${isStampedOrLeave ? 'opacity-30' : 'opacity-90'}">${numStr}</span>`;
+      }
+      if (mode === 'nameOnly') {
+        const nameText = studentName || `${numStr}號`;
+        return `<span class="text-[10px] sm:text-xs font-bold truncate max-w-[90%] leading-tight ${isStampedOrLeave ? 'opacity-30' : 'opacity-90'}">${escapeHTML(nameText)}</span>`;
+      }
+
+      // Default: 'both'
+      return `
+        <span class="text-[11px] sm:text-xs font-black leading-none ${isStampedOrLeave ? 'opacity-30' : 'opacity-90'}">${numStr}</span>
+        ${studentName ? `<span class="text-[9px] sm:text-[10px] truncate max-w-[92%] font-medium leading-none mt-0.5 ${isStampedOrLeave ? 'opacity-20' : 'opacity-60'}">${escapeHTML(studentName)}</span>` : ''}
+      `;
+    }
+
+    function createSingleTaskCardHTML(task) {
+      const curClass = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+      const maxSeats = curClass.maxSeats || 30;
+
+      let stampedCount = 0;
+      let leaveCount = 0;
+
+      for (let i = 1; i <= maxSeats; i++) {
+        const st = task.states?.[i] || 'none';
+        if (st === 'stamped') stampedCount++;
+        if (st === 'leave') leaveCount++;
+      }
+
+      const validDenominator = Math.max(1, maxSeats - leaveCount);
+      const percent = Math.round((stampedCount / validDenominator) * 100);
+
+      let seatsHTML = '';
+      for (let i = 1; i <= maxSeats; i++) {
+        const state = task.states?.[i] || 'none';
+        const studentName = curClass.studentNames?.[i] || '';
+        const numStr = i < 10 ? '0' + i : i;
+
+        let stateClasses = 'hover:border-slate-300';
+        let stampBadgeHTML = '';
+
+        if (state === 'stamped') {
+          stateClasses = 'shadow-sm';
+          stampBadgeHTML = `
+            <div class="absolute inset-0 flex items-center justify-center animate-stamp-pop pointer-events-none">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 font-black text-xs flex items-center justify-center stamp-mark transform -rotate-12">
+                ${task.stampText || '閱'}
+              </div>
+            </div>
+          `;
+        } else if (state === 'leave') {
+          stateClasses = 'opacity-60';
+          stampBadgeHTML = `
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded border border-dashed font-bold text-[10px] flex items-center justify-center bg-black/10">
+                假
+              </div>
+            </div>
+          `;
+        }
+
+        seatsHTML += `
+          <button onclick="handleSingleSeatClick('${task.id}', ${i})" 
+                  title="${numStr}號 ${studentName ? '(' + studentName + ')' : ''}"
+                  style="background-color: var(--seat-bg); border-color: var(--seat-border); color: var(--seat-color);"
+                  class="relative aspect-square rounded-xl border flex flex-col items-center justify-center p-1 transition-all active:scale-90 ${stateClasses}">
+            ${getSeatInnerLabelHTML(i, studentName, state !== 'none')}
+            ${stampBadgeHTML}
+          </button>
+        `;
+      }
+
+      return `
+        <div class="themed-card overflow-hidden flex flex-col">
+          <div class="p-5 border-b pb-4" style="border-color: var(--card-border);">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-1 rounded-md text-[11px] font-bold" style="background-color: var(--badge-bg); color: var(--badge-color);">
+                <i class="fa-solid fa-check-double mr-1"></i>獨立任務 • ${escapeHTML(curClass.name)}
+              </span>
+              <div class="flex items-center gap-1">
+                <button onclick="openFocusModal('${task.id}')" class="text-xs px-2.5 py-1 font-bold rounded-lg transition flex items-center gap-1 themed-btn-sub" title="大螢幕聚焦全螢幕模式">
+                  <i class="fa-solid fa-expand"></i>
+                  <span>聚焦</span>
+                </button>
+                <button onclick="batchStampSingleTask('${task.id}')" class="text-xs p-1.5 opacity-60 hover:opacity-100 transition" title="全班劃一蓋章">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+                <button onclick="resetSingleTask('${task.id}')" class="text-xs p-1.5 opacity-60 hover:opacity-100 transition" title="重置所有人">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button onclick="deleteTask('${task.id}')" class="text-xs p-1.5 opacity-40 hover:opacity-100 text-rose-500 transition" title="刪除此任務">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+            <h3 class="font-extrabold text-base mb-1">
+              <span>${escapeHTML(task.title)}</span>
+            </h3>
+
+            <div class="mt-1 flex items-center justify-between text-xs opacity-75">
+              <span class="flex items-center gap-1">
+                <i class="fa-regular fa-clock"></i>
+                <span>啟動：${task.startTime ? escapeHTML(task.startTime) : '<span class="italic opacity-60">未設定</span>'}</span>
+              </span>
+              <button onclick="setTaskStartTimeNow('${task.id}')" class="text-[10px] font-bold underline cursor-pointer" style="color: var(--primary);">
+                ${task.startTime ? '更新時間' : '+ 設為現在'}
+              </button>
+            </div>
+
+            <div class="mt-3">
+              <div class="flex justify-between items-center text-xs font-semibold mb-1">
+                <span>已完成人數</span>
+                <span class="font-black">${stampedCount} / ${validDenominator} 人 <span class="ml-1" style="color: var(--primary);">${percent}%</span></span>
+              </div>
+              <div class="w-full rounded-full h-2.5 overflow-hidden" style="background-color: var(--progress-bg);">
+                <div class="h-2.5 rounded-full transition-all duration-300" style="width: ${percent}%; background-color: var(--progress-fill);"></div>
+              </div>
+              ${leaveCount > 0 ? `<p class="text-[11px] opacity-60 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>已排除請假/免繳 ${leaveCount} 人</p>` : ''}
+            </div>
+          </div>
+
+          <div class="p-5 flex-1 bg-black/5">
+            <div class="grid grid-cols-5 sm:grid-cols-6 gap-2">
+              ${seatsHTML}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createPipelineTaskCardHTML(task) {
+      const curClass = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+      const maxSeats = curClass.maxSeats || 30;
+
+      const currentStageIdx = task.currentStageIndex || 0;
+      const currentStage = task.stages[currentStageIdx] || task.stages[0];
+
+      const stageTabsHTML = task.stages.map((stg, idx) => {
+        const isActive = idx === currentStageIdx;
+        let stgStamped = 0;
+        let stgLeave = 0;
+        for (let i = 1; i <= maxSeats; i++) {
+          const pipe = task.pipelineStates?.[i] || {};
+          if (pipe[task.stages[0].id] === 'leave') stgLeave++;
+          else if (pipe[stg.id] === 'stamped') stgStamped++;
+        }
+        const denom = Math.max(1, maxSeats - stgLeave);
+        const p = Math.round((stgStamped / denom) * 100);
+
+        return `
+          <button onclick="switchPipelineStage('${task.id}', ${idx})" 
+                  style="${isActive ? 'background-color: var(--primary); color: white;' : 'background-color: var(--seat-bg); border-color: var(--seat-border);'}"
+                  class="flex-1 min-w-[90px] py-2 px-2 rounded-xl text-xs font-bold border transition-all text-left flex flex-col gap-0.5">
+            <div class="flex items-center justify-between w-full text-[10px] opacity-80">
+              <span>關卡 ${idx + 1}</span>
+              <span>${p}%</span>
+            </div>
+            <span class="truncate">${escapeHTML(stg.name)}</span>
+          </button>
+        `;
+      }).join('');
+
+      let seatsHTML = '';
+      let stageStampedCount = 0;
+      let stageLeaveCount = 0;
+
+      for (let i = 1; i <= maxSeats; i++) {
+        const studentPipe = task.pipelineStates?.[i] || {};
+        const isExempt = studentPipe[task.stages[0].id] === 'leave';
+
+        let isUnlocked = true;
+        if (currentStageIdx > 0) {
+          const prevStageId = task.stages[currentStageIdx - 1].id;
+          isUnlocked = studentPipe[prevStageId] === 'stamped';
+        }
+
+        const currentState = isExempt ? 'leave' : (studentPipe[currentStage.id] || 'none');
+        if (currentState === 'stamped') stageStampedCount++;
+        if (isExempt) stageLeaveCount++;
+
+        const studentName = curClass.studentNames?.[i] || '';
+        const numStr = i < 10 ? '0' + i : i;
+
+        let stateClasses = 'hover:border-slate-300';
+        let stampBadgeHTML = '';
+
+        if (isExempt) {
+          stateClasses = 'opacity-60';
+          stampBadgeHTML = `
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded border border-dashed font-bold text-[10px] flex items-center justify-center bg-black/10">
+                假
+              </div>
+            </div>
+          `;
+        } else if (!isUnlocked) {
+          stateClasses = 'opacity-40 cursor-not-allowed';
+          stampBadgeHTML = `
+            <div class="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none text-xs">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+          `;
+        } else if (currentState === 'stamped') {
+          stateClasses = 'shadow-sm';
+          stampBadgeHTML = `
+            <div class="absolute inset-0 flex items-center justify-center animate-stamp-pop pointer-events-none">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 font-black text-xs flex items-center justify-center stamp-mark transform -rotate-12">
+                ${task.stampText || '閱'}
+              </div>
+            </div>
+          `;
+        }
+
+        seatsHTML += `
+          <button onclick="handlePipelineSeatClick('${task.id}', ${i})" 
+                  ${!isUnlocked && !isExempt ? 'disabled' : ''}
+                  title="${numStr}號 ${studentName ? '(' + studentName + ')' : ''} ${!isUnlocked ? '- 請先完成前一關卡' : ''}"
+                  style="background-color: var(--seat-bg); border-color: var(--seat-border); color: var(--seat-color);"
+                  class="relative aspect-square rounded-xl border flex flex-col items-center justify-center p-1 transition-all active:scale-90 ${stateClasses}">
+            ${getSeatInnerLabelHTML(i, studentName, currentState !== 'none' || !isUnlocked)}
+            ${stampBadgeHTML}
+          </button>
+        `;
+      }
+
+      const validDenominator = Math.max(1, maxSeats - stageLeaveCount);
+      const stagePercent = Math.round((stageStampedCount / validDenominator) * 100);
+
+      return `
+        <div class="themed-card overflow-hidden flex flex-col">
+          <div class="p-5 border-b pb-4" style="border-color: var(--card-border);">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-1 rounded-md text-[11px] font-bold" style="background-color: var(--badge-bg); color: var(--badge-color);">
+                <i class="fa-solid fa-route mr-1"></i>連續任務 • ${escapeHTML(curClass.name)}
+              </span>
+              <div class="flex items-center gap-1">
+                <button onclick="openFocusModal('${task.id}')" class="text-xs px-2.5 py-1 font-bold rounded-lg transition flex items-center gap-1 themed-btn-sub" title="大螢幕聚焦全螢幕模式">
+                  <i class="fa-solid fa-expand"></i>
+                  <span>聚焦</span>
+                </button>
+                <button onclick="deleteTask('${task.id}')" class="text-xs p-1.5 opacity-40 hover:opacity-100 text-rose-500 transition" title="刪除此任務">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+            <h3 class="font-extrabold text-base mb-1">
+              <span>${escapeHTML(task.title)}</span>
+            </h3>
+
+            <div class="mb-3 flex items-center justify-between text-xs opacity-75">
+              <span class="flex items-center gap-1">
+                <i class="fa-regular fa-clock"></i>
+                <span>啟動：${task.startTime ? escapeHTML(task.startTime) : '<span class="italic opacity-60">未設定</span>'}</span>
+              </span>
+              <button onclick="setTaskStartTimeNow('${task.id}')" class="text-[10px] font-bold underline cursor-pointer" style="color: var(--primary);">
+                ${task.startTime ? '更新時間' : '+ 設為現在'}
+              </button>
+            </div>
+
+            <div class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 mb-3">
+              ${stageTabsHTML}
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center text-xs font-semibold mb-1">
+                <span>${escapeHTML(currentStage.name)} 進度</span>
+                <span class="font-black">${stageStampedCount} / ${validDenominator} 人 <span class="ml-1" style="color: var(--primary);">${stagePercent}%</span></span>
+              </div>
+              <div class="w-full rounded-full h-2.5 overflow-hidden" style="background-color: var(--progress-bg);">
+                <div class="h-2.5 rounded-full transition-all duration-300" style="width: ${stagePercent}%; background-color: var(--progress-fill);"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 flex-1 bg-black/5">
+            <div class="grid grid-cols-5 sm:grid-cols-6 gap-2">
+              ${seatsHTML}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleSingleSeatClick(taskId, seatNum) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      if (!task.states) task.states = {};
+      const currentState = task.states[seatNum] || 'none';
+
+      const prevPercent = getTaskCompletionPercentage(task);
+
+      if (currentState === 'none') {
+        task.states[seatNum] = 'stamped';
+        playSound('stamp');
+      } else if (currentState === 'stamped') {
+        task.states[seatNum] = 'leave';
+        playSound('leave');
+      } else {
+        task.states[seatNum] = 'none';
+      }
+
+      const newPercent = getTaskCompletionPercentage(task);
+      if (prevPercent < 100 && newPercent === 100) {
+        triggerConfetti();
+        showToast('🎉 恭喜！全班皆已達成 100% 完成！', 'success');
+      }
+
+      saveData();
+    }
+
+    function handlePipelineSeatClick(taskId, seatNum) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const curClass = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+
+      if (!task.pipelineStates) task.pipelineStates = {};
+      if (!task.pipelineStates[seatNum]) task.pipelineStates[seatNum] = {};
+
+      const currentStageIdx = task.currentStageIndex || 0;
+      const currentStage = task.stages[currentStageIdx];
+      const currentState = task.pipelineStates[seatNum][currentStage.id] || 'none';
+
+      const numStr = seatNum < 10 ? '0' + seatNum : seatNum;
+      const nameStr = curClass.studentNames?.[seatNum] ? ` (${curClass.studentNames[seatNum]})` : '';
+
+      const prevPercent = getTaskCompletionPercentage(task);
+
+      if (currentStageIdx === 0) {
+        if (currentState === 'none') {
+          task.pipelineStates[seatNum][currentStage.id] = 'stamped';
+          playSound('stamp');
+
+          if (task.stages.length > 1) {
+            const nextStageName = task.stages[1].name;
+            showToast(`🎉 <strong>${numStr} 號${nameStr}</strong> 已成功解鎖下一關：「${nextStageName}」！`, 'unlock');
+          }
+        } else if (currentState === 'stamped') {
+          task.pipelineStates[seatNum][currentStage.id] = 'leave';
+          playSound('leave');
+        } else {
+          task.pipelineStates[seatNum][currentStage.id] = 'none';
+        }
+      } else {
+        if (currentState === 'none') {
+          task.pipelineStates[seatNum][currentStage.id] = 'stamped';
+          playSound('stamp');
+
+          if (currentStageIdx + 1 < task.stages.length) {
+            const nextStageName = task.stages[currentStageIdx + 1].name;
+            showToast(`🎉 <strong>${numStr} 號${nameStr}</strong> 通過關卡！已解鎖：「${nextStageName}」！`, 'unlock');
+          }
+        } else {
+          task.pipelineStates[seatNum][currentStage.id] = 'none';
+        }
+      }
+
+      const newPercent = getTaskCompletionPercentage(task);
+      if (prevPercent < 100 && newPercent === 100) {
+        triggerConfetti();
+        showToast('🎉 恭喜！全班皆已通關所有流程！', 'success');
+      }
+
+      saveData();
+    }
+
+    function switchPipelineStage(taskId, stageIndex) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.currentStageIndex = stageIndex;
+        saveData();
+      }
+    }
+
+    function batchStampSingleTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task || task.type !== 'single') return;
+
+      const curClass = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+      const maxSeats = curClass.maxSeats || 30;
+
+      for (let i = 1; i <= maxSeats; i++) {
+        if (!task.states[i] || task.states[i] === 'none') {
+          task.states[i] = 'stamped';
+        }
+      }
+      playSound('stamp');
+      if (getTaskCompletionPercentage(task) === 100) {
+        triggerConfetti();
+      }
+      saveData();
+      showToast('已批次全班蓋章！', 'success');
+    }
+
+    function resetSingleTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+      if (task.type === 'single') {
+        task.states = {};
+      } else {
+        task.pipelineStates = {};
+        task.currentStageIndex = 0;
+      }
+      saveData();
+      showToast('重置該任務進度完成！', 'info');
+    }
+
+    function deleteTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const modalBox = document.getElementById('modalBox');
+      modalBox.innerHTML = `
+        <div class="text-center py-4">
+          <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-xl">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+          <h3 class="font-extrabold text-base mb-1">確定要刪除任務「${escapeHTML(task.title)}」？</h3>
+          <p class="text-xs opacity-60 mb-6">此動作無法復原，該卡片的所有集章紀錄將會被刪除。</p>
+          <div class="flex justify-center gap-3">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+            <button onclick="executeDeleteTask('${taskId}')" class="px-4 py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md">確認刪除</button>
+          </div>
+        </div>
+      `;
+      showModal();
+    }
+
+    function executeDeleteTask(taskId) {
+      appState.tasks = appState.tasks.filter(t => t.id !== taskId);
+      if (currentFocusedTaskId === taskId) {
+        closeFocusModal();
+      }
+      saveData();
+      closeModal();
+      showToast('任務已成功刪除', 'info');
+    }
+
+    function setTaskStartTimeNow(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.startTime = getFormattedCurrentTime();
+        saveData();
+        showToast('已更新任務啟動時間！', 'success');
+      }
+    }
+
+    let currentFocusedTaskId = null;
+
+    function openFocusModal(taskId) {
+      currentFocusedTaskId = taskId;
+      const backdrop = document.getElementById('focusModalBackdrop');
+      const box = document.getElementById('focusModalBox');
+      
+      renderFocusModalContent();
+
+      backdrop.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.classList.remove('opacity-0');
+        box.classList.remove('scale-95');
+      });
+    }
+
+    function closeFocusModal() {
+      currentFocusedTaskId = null;
+      const backdrop = document.getElementById('focusModalBackdrop');
+      const box = document.getElementById('focusModalBox');
+      backdrop.classList.add('opacity-0');
+      box.classList.add('scale-95');
+      setTimeout(() => { backdrop.classList.add('hidden'); }, 200);
+    }
+
+    function renderFocusModalContent() {
+      if (!currentFocusedTaskId) return;
+      const task = appState.tasks.find(t => t.id === currentFocusedTaskId);
+      if (!task) {
+        closeFocusModal();
+        return;
+      }
+
+      const curClass = appState.classes.find(c => c.id === task.classId) || getCurrentClassObj();
+      const maxSeats = curClass.maxSeats || 30;
+
+      const box = document.getElementById('focusModalBox');
+      const percent = getTaskCompletionPercentage(task);
+
+      let seatsHTML = '';
+
+      if (task.type === 'single') {
+        let stampedCount = 0;
+        let leaveCount = 0;
+
+        for (let i = 1; i <= maxSeats; i++) {
+          const state = task.states?.[i] || 'none';
+          if (state === 'stamped') stampedCount++;
+          if (state === 'leave') leaveCount++;
+
+          const studentName = curClass.studentNames?.[i] || '';
+          const numStr = i < 10 ? '0' + i : i;
+
+          let stateClasses = 'hover:border-slate-300';
+          let stampBadgeHTML = '';
+
+          if (state === 'stamped') {
+            stateClasses = 'shadow-md';
+            stampBadgeHTML = `
+              <div class="absolute inset-0 flex items-center justify-center animate-stamp-pop pointer-events-none">
+                <div class="w-12 h-12 rounded-full border-2 font-black text-base flex items-center justify-center stamp-mark transform -rotate-12">
+                  ${task.stampText || '繳'}
+                </div>
+              </div>
+            `;
+          } else if (state === 'leave') {
+            stateClasses = 'opacity-60';
+            stampBadgeHTML = `
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-10 h-10 rounded border border-dashed font-bold text-xs flex items-center justify-center bg-black/10">
+                  假
+                </div>
+              </div>
+            `;
+          }
+
+          seatsHTML += `
+            <button onclick="handleSingleSeatClick('${task.id}', ${i})" 
+                    style="background-color: var(--seat-bg); border-color: var(--seat-border); color: var(--seat-color);"
+                    class="relative aspect-square rounded-2xl border-2 flex flex-col items-center justify-center p-2 transition-all active:scale-90 ${stateClasses}">
+              ${getSeatInnerLabelHTML(i, studentName, state !== 'none')}
+              ${stampBadgeHTML}
+            </button>
+          `;
+        }
+
+        const validDenominator = Math.max(1, maxSeats - leaveCount);
+
+        box.innerHTML = `
+          <div class="flex items-start justify-between pb-4 border-b" style="border-color: var(--card-border);">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-3 py-1 rounded-lg text-xs font-bold" style="background-color: var(--badge-bg); color: var(--badge-color);">
+                  獨立任務 • ${escapeHTML(curClass.name)} • 大螢幕聚焦
+                </span>
+                ${task.startTime ? `<span class="text-xs opacity-60"><i class="fa-regular fa-clock mr-1"></i>啟動於 ${escapeHTML(task.startTime)}</span>` : ''}
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black tracking-tight">${escapeHTML(task.title)}</h2>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="batchStampSingleTask('${task.id}')" class="px-3 py-2 text-xs font-bold rounded-xl transition themed-btn-sub">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 全蓋
+              </button>
+              <button onclick="closeFocusModal()" class="w-10 h-10 rounded-xl flex items-center justify-center transition themed-btn-sub">
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="py-4 border-b" style="border-color: var(--card-border);">
+            <div class="flex justify-between items-center text-sm font-bold mb-2">
+              <span class="opacity-70">班級進度儀表板</span>
+              <span class="font-extrabold text-lg">${stampedCount} / ${validDenominator} 人 <span class="ml-1" style="color: var(--primary);">${percent}%</span></span>
+            </div>
+            <div class="w-full rounded-full h-4 overflow-hidden" style="background-color: var(--progress-bg);">
+              <div class="h-4 rounded-full transition-all duration-300" style="width: ${percent}%; background-color: var(--progress-fill);"></div>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto custom-scrollbar py-6">
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 sm:gap-4">
+              ${seatsHTML}
+            </div>
+          </div>
+        `;
+
+      } else {
+        const currentStageIdx = task.currentStageIndex || 0;
+        const currentStage = task.stages[currentStageIdx] || task.stages[0];
+
+        let stageStampedCount = 0;
+        let stageLeaveCount = 0;
+
+        for (let i = 1; i <= maxSeats; i++) {
+          const studentPipe = task.pipelineStates?.[i] || {};
+          const isExempt = studentPipe[task.stages[0].id] === 'leave';
+
+          let isUnlocked = true;
+          if (currentStageIdx > 0) {
+            const prevStageId = task.stages[currentStageIdx - 1].id;
+            isUnlocked = studentPipe[prevStageId] === 'stamped';
+          }
+
+          const currentState = isExempt ? 'leave' : (studentPipe[currentStage.id] || 'none');
+          if (currentState === 'stamped') stageStampedCount++;
+          if (isExempt) stageLeaveCount++;
+
+          const studentName = curClass.studentNames?.[i] || '';
+          const numStr = i < 10 ? '0' + i : i;
+
+          let stateClasses = 'hover:border-slate-300';
+          let stampBadgeHTML = '';
+
+          if (isExempt) {
+            stateClasses = 'opacity-60';
+            stampBadgeHTML = `
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-10 h-10 rounded border border-dashed font-bold text-xs flex items-center justify-center bg-black/10">
+                  假
+                </div>
+              </div>
+            `;
+          } else if (!isUnlocked) {
+            stateClasses = 'opacity-40 cursor-not-allowed';
+            stampBadgeHTML = `
+              <div class="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none text-sm">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+            `;
+          } else if (currentState === 'stamped') {
+            stateClasses = 'shadow-md';
+            stampBadgeHTML = `
+              <div class="absolute inset-0 flex items-center justify-center animate-stamp-pop pointer-events-none">
+                <div class="w-12 h-12 rounded-full border-2 font-black text-base flex items-center justify-center stamp-mark transform -rotate-12">
+                  ${task.stampText || '閱'}
+                </div>
+              </div>
+            `;
+          }
+
+          seatsHTML += `
+            <button onclick="handlePipelineSeatClick('${task.id}', ${i})" 
+                    ${!isUnlocked && !isExempt ? 'disabled' : ''}
+                    style="background-color: var(--seat-bg); border-color: var(--seat-border); color: var(--seat-color);"
+                    class="relative aspect-square rounded-2xl border-2 flex flex-col items-center justify-center p-2 transition-all active:scale-90 ${stateClasses}">
+              ${getSeatInnerLabelHTML(i, studentName, currentState !== 'none' || !isUnlocked)}
+              ${stampBadgeHTML}
+            </button>
+          `;
+        }
+
+        const validDenominator = Math.max(1, maxSeats - stageLeaveCount);
+        const stagePercent = Math.round((stageStampedCount / validDenominator) * 100);
+
+        const stageTabsHTML = task.stages.map((stg, idx) => {
+          const isActive = idx === currentStageIdx;
+          return `
+            <button onclick="switchPipelineStage('${task.id}', ${idx})" 
+                    style="${isActive ? 'background-color: var(--primary); color: white;' : 'background-color: var(--seat-bg); border-color: var(--seat-border);'}"
+                    class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border transition-all">
+              ${idx + 1}. ${escapeHTML(stg.name)}
+            </button>
+          `;
+        }).join('');
+
+        box.innerHTML = `
+          <div class="flex items-start justify-between pb-3 border-b" style="border-color: var(--card-border);">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-3 py-1 rounded-lg text-xs font-bold" style="background-color: var(--badge-bg); color: var(--badge-color);">
+                  連續關卡 • ${escapeHTML(curClass.name)} • 大螢幕聚焦
+                </span>
+                ${task.startTime ? `<span class="text-xs opacity-60"><i class="fa-regular fa-clock mr-1"></i>啟動於 ${escapeHTML(task.startTime)}</span>` : ''}
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black tracking-tight">${escapeHTML(task.title)}</h2>
+            </div>
+            
+            <button onclick="closeFocusModal()" class="w-10 h-10 rounded-xl flex items-center justify-center transition themed-btn-sub">
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+
+          <div class="flex gap-2 my-3 overflow-x-auto custom-scrollbar pb-1">
+            ${stageTabsHTML}
+          </div>
+
+          <div class="pb-3 border-b" style="border-color: var(--card-border);">
+            <div class="flex justify-between items-center text-sm font-bold mb-1">
+              <span class="opacity-70">${escapeHTML(currentStage.name)} 完成率</span>
+              <span class="font-extrabold text-lg">${stageStampedCount} / ${validDenominator} 人 <span class="ml-1" style="color: var(--primary);">${stagePercent}%</span></span>
+            </div>
+            <div class="w-full rounded-full h-4 overflow-hidden" style="background-color: var(--progress-bg);">
+              <div class="h-4 rounded-full transition-all duration-300" style="width: ${stagePercent}%; background-color: var(--progress-fill);"></div>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto custom-scrollbar py-6">
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 sm:gap-4">
+              ${seatsHTML}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Export & Report Center Modal
+    function openExportModal() {
+      const modalBox = document.getElementById('modalBox');
+      const curClass = getCurrentClassObj();
+
+      let studentOptionsHTML = '';
+      for (let i = 1; i <= curClass.maxSeats; i++) {
+        const name = curClass.studentNames?.[i] ? ` (${curClass.studentNames[i]})` : '';
+        const numStr = i < 10 ? '0' + i : i;
+        studentOptionsHTML += `<option value="${i}">${numStr} 號${name}</option>`;
+      }
+
+      modalBox.innerHTML = `
+        <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--card-border);">
+          <h3 class="font-extrabold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-file-export" style="color: var(--primary);"></i> 數據報告與匯出中心 (${escapeHTML(curClass.name)})
+          </h3>
+          <button onclick="closeModal()" class="p-1 opacity-50 hover:opacity-100">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="space-y-5 overflow-y-auto custom-scrollbar pr-1 flex-1">
+          
+          <!-- 1. Excel / CSV Export -->
+          <div class="p-3.5 rounded-2xl border" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                <span>匯出當前班級數據 (Excel / CSV 表格)</span>
+              </span>
+              <button onclick="exportCSV()" class="themed-btn-primary px-3 py-1 text-xs font-bold shadow-sm">
+                匯出 CSV
+              </button>
+            </div>
+            <p class="text-[11px] opacity-70">導出 ${escapeHTML(curClass.name)} 所有人座號姓名在任務中的繳交矩陣，適用 Excel 打開備份或行政列印。</p>
+          </div>
+
+          <!-- 2. Individual Student Progress Report Generator -->
+          <div class="p-3.5 rounded-2xl border space-y-2.5" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-comments text-indigo-500"></i>
+                <span>產出個別同學親師溝通卡</span>
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <select id="reportSeatSelect" onchange="updateStudentReportText()" class="flex-1 px-3 py-1.5 rounded-xl border text-xs font-bold focus:outline-none" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                ${studentOptionsHTML}
+              </select>
+              <button onclick="copyReportToClipboard()" class="themed-btn-primary px-3 py-1.5 text-xs font-bold shadow-sm flex items-center gap-1">
+                <i class="fa-regular fa-copy"></i>
+                <span>一鍵複製</span>
+              </button>
+            </div>
+
+            <textarea id="studentReportText" readonly rows="6" 
+                      class="w-full px-3 py-2 rounded-xl border text-xs font-mono focus:outline-none custom-scrollbar" 
+                      style="background-color: var(--card-bg); border-color: var(--card-border);"></textarea>
+          </div>
+
+          <!-- 3. System Backup JSON -->
+          <div class="p-3.5 rounded-2xl border" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-database text-amber-500"></i>
+                <span>全系統 JSON 備份與還原</span>
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button onclick="exportJSON()" class="themed-btn-sub px-2.5 py-1 text-xs font-bold">下載 JSON</button>
+                <button onclick="triggerImportData()" class="themed-btn-sub px-2.5 py-1 text-xs font-bold">匯入 JSON</button>
+                <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importData(event)">
+              </div>
+            </div>
+            <p class="text-[11px] opacity-70">備份包含所有班級與任務，用於跨裝置與智慧白板 100% 完整還原。</p>
+          </div>
+
+          <!-- Clear All Data Button -->
+          <div class="pt-2 flex justify-between items-center border-t opacity-70 hover:opacity-100" style="border-color: var(--card-border);">
+            <button onclick="confirmResetAll()" class="text-xs text-rose-600 font-bold hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-trash-can"></i> 清空重置所有資料
+            </button>
+            <button onclick="closeModal()" class="px-3 py-1.5 text-xs font-bold opacity-60">關閉</button>
+          </div>
+
+        </div>
+      `;
+
+      showModal();
+      updateStudentReportText();
+    }
+
+    function generateStudentReport(seatNum) {
+      const curClass = getCurrentClassObj();
+      const name = curClass.studentNames?.[seatNum] ? ` (${curClass.studentNames[seatNum]})` : '';
+      const numStr = seatNum < 10 ? '0' + seatNum : seatNum;
+
+      const classTasks = appState.tasks.filter(t => t.classId === curClass.id);
+
+      let report = `【${curClass.name} 學習與任務闖關小報】\n`;
+      report += `🌟 ${numStr} 號${name} 同學目前進度彙整：\n`;
+      report += `----------------------------------------\n`;
+
+      if (classTasks.length === 0) {
+        report += `目前尚無進行中的任務。\n`;
+      } else {
+        classTasks.forEach((t, idx) => {
+          report += `${idx + 1}. ${t.title}：`;
+          if (t.type === 'single') {
+            const st = t.states?.[seatNum] || 'none';
+            if (st === 'stamped') report += `已完成 (已蓋章) ✅\n`;
+            else if (st === 'leave') report += `請假 / 免繳 🏖️\n`;
+            else report += `尚未繳交 ⏳\n`;
+          } else {
+            const pipe = t.pipelineStates?.[seatNum] || {};
+            if (pipe[t.stages[0].id] === 'leave') {
+              report += `請假 / 免繳 🏖️\n`;
+            } else {
+              let highestCompleted = -1;
+              t.stages.forEach((stg, sIdx) => {
+                if (pipe[stg.id] === 'stamped') highestCompleted = sIdx;
+              });
+              if (highestCompleted === t.stages.length - 1) {
+                report += `全關卡通過 (100%) 🎉\n`;
+              } else if (highestCompleted >= 0) {
+                report += `進行中 (已通過第 ${highestCompleted + 1} 關：${t.stages[highestCompleted].name}) 🚀\n`;
+              } else {
+                report += `待通過第 1 关 (${t.stages[0].name}) ⏳\n`;
+              }
+            }
+          }
+        });
+      }
+
+      report += `----------------------------------------\n`;
+      report += `💡 感謝家長關心與協助，讓我們一起陪伴孩子進步！\n`;
+      report += `記錄時間：${getFormattedCurrentTime()}\n`;
+
+      return report;
+    }
+
+    function updateStudentReportText() {
+      const select = document.getElementById('reportSeatSelect');
+      if (!select) return;
+      const seatNum = parseInt(select.value, 10) || 1;
+      const reportTextarea = document.getElementById('studentReportText');
+      if (reportTextarea) {
+        reportTextarea.value = generateStudentReport(seatNum);
+      }
+    }
+
+    function copyReportToClipboard() {
+      const textarea = document.getElementById('studentReportText');
+      if (!textarea) return;
+      textarea.select();
+      document.execCommand('copy');
+      showToast('已複製親師對話卡至剪貼簿！', 'success');
+    }
+
+    function exportCSV() {
+      const curClass = getCurrentClassObj();
+      const classTasks = appState.tasks.filter(t => t.classId === curClass.id);
+
+      let csv = "\uFEFF"; // UTF-8 BOM for Microsoft Excel compatibility
+      csv += "班級,座號,學生姓名";
+      classTasks.forEach(t => {
+        csv += `,"${t.title.replace(/"/g, '""')}"`;
+      });
+      csv += "\n";
+
+      for (let i = 1; i <= curClass.maxSeats; i++) {
+        const name = curClass.studentNames?.[i] || '';
+        let row = `"${curClass.name}",${i},"${name.replace(/"/g, '""')}"`;
+        classTasks.forEach(t => {
+          let statusStr = "未完成";
+          if (t.type === 'single') {
+            const st = t.states?.[i] || 'none';
+            if (st === 'stamped') statusStr = "已完成";
+            if (st === 'leave') statusStr = "請假/免繳";
+          } else {
+            const pipe = t.pipelineStates?.[i] || {};
+            if (pipe[t.stages[0].id] === 'leave') {
+              statusStr = "請假/免繳";
+            } else {
+              let completedStage = 0;
+              t.stages.forEach((stg, idx) => {
+                if (pipe[stg.id] === 'stamped') completedStage = idx + 1;
+              });
+              if (completedStage === t.stages.length) {
+                statusStr = "全關卡通過(100%)";
+              } else if (completedStage > 0) {
+                statusStr = `已通過第 ${completedStage} 關 (${t.stages[completedStage - 1].name})`;
+              } else {
+                statusStr = "待通過第一關";
+              }
+            }
+          }
+          row += `,"${statusStr.replace(/"/g, '""')}"`;
+        });
+        csv += row + "\n";
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${curClass.name}_任務繳交統計_${getFormattedCurrentTime().replace(/[\/ :]/g, '_')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('已成功匯出 Excel/CSV 表格檔！', 'success');
+    }
+
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `班級任務追蹤備份_${getFormattedCurrentTime().replace(/[\/ :]/g, '_')}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('JSON 備份資料已順利下載！', 'success');
+    }
+
+    function triggerImportData() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.classes)) {
+            appState = parsed;
+            saveData();
+            showToast('成功匯入 JSON 備份資料！', 'success');
+            closeModal();
+          } else {
+            showToast('匯入失敗：檔案格式不符合！', 'error');
+          }
+        } catch (err) {
+          showToast('匯入失敗：無法解析 JSON 內容', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function openAddTaskModal() {
+      const modalBox = document.getElementById('modalBox');
+      const defaultTimeStr = getFormattedCurrentTime();
+      const curClass = getCurrentClassObj();
+
+      modalBox.innerHTML = `
+        <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--card-border);">
+          <h3 class="font-extrabold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> 新增任務卡片 (${escapeHTML(curClass.name)})
+          </h3>
+          <button onclick="closeModal()" class="p-1 opacity-50 hover:opacity-100">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleAddTaskSubmit(event)" class="space-y-4 overflow-y-auto custom-scrollbar pr-1 flex-1">
+          
+          <div>
+            <label class="block text-xs font-bold mb-1">任務名稱</label>
+            <input type="text" id="newTaskTitle" required placeholder="例如：小藍本作業、校慶回條..." 
+                   class="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">啟動時間（選填，用於追蹤耗時）</label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="newTaskStartTime" placeholder="例如：${defaultTimeStr}" value="${defaultTimeStr}"
+                     class="flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+              <button type="button" onclick="document.getElementById('newTaskStartTime').value='${defaultTimeStr}'" 
+                      class="px-2.5 py-2 text-xs font-bold rounded-xl transition themed-btn-sub">
+                帶入現在
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">任務類型</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="border rounded-xl p-3 flex flex-col gap-1 cursor-pointer hover:bg-black/5 transition" style="border-color: var(--card-border);">
+                <input type="radio" name="newTaskType" value="single" checked onchange="togglePipelineStageInputs(false)" class="hidden">
+                <span class="font-bold text-xs"><i class="fa-solid fa-check-double mr-1" style="color: var(--primary);"></i>獨立任務</span>
+                <span class="text-[11px] opacity-60">單次蓋章即完成（例：回條、收費）</span>
+              </label>
+              
+              <label class="border rounded-xl p-3 flex flex-col gap-1 cursor-pointer hover:bg-black/5 transition" style="border-color: var(--card-border);">
+                <input type="radio" name="newTaskType" value="pipeline" onchange="togglePipelineStageInputs(true)" class="hidden">
+                <span class="font-bold text-xs"><i class="fa-solid fa-route mr-1" style="color: var(--primary);"></i>連續任務</span>
+                <span class="text-[11px] opacity-60">多階段關卡解鎖（例：繳交➔訂正）</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">印章文字</label>
+            <select id="newTaskStampText" class="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+              <option value="繳">「繳」字章 (適用繳交物)</option>
+              <option value="閱">「閱」字章 (適用作業改完)</option>
+              <option value="過">「過」字章 (適用背誦關卡)</option>
+              <option value="讚">「讚」字章 (適用良好獎勵)</option>
+            </select>
+          </div>
+
+          <div id="pipelineStagesContainer" class="hidden space-y-2 p-3 rounded-xl border" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+            <label class="block text-xs font-bold">自訂關卡流程（按順序解鎖）</label>
+            <div id="stagesList" class="space-y-2">
+              <input type="text" value="階段 1：第一次繳交" class="stage-input w-full px-3 py-1.5 rounded-lg border text-xs" style="background-color: var(--card-bg); border-color: var(--card-border);">
+              <input type="text" value="階段 2：錯題訂正" class="stage-input w-full px-3 py-1.5 rounded-lg border text-xs" style="background-color: var(--card-bg); border-color: var(--card-border);">
+            </div>
+            <button type="button" onclick="addStageInput()" class="text-xs font-bold hover:underline flex items-center gap-1 mt-1" style="color: var(--primary);">
+              <i class="fa-solid fa-plus-circle"></i> 新增下一個關卡
+            </button>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t mt-4" style="border-color: var(--card-border);">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+            <button type="submit" class="themed-btn-primary px-4 py-2 text-xs font-black shadow-md">建立任務</button>
+          </div>
+
+        </form>
+      `;
+      showModal();
+    }
+
+    function togglePipelineStageInputs(isPipeline) {
+      const container = document.getElementById('pipelineStagesContainer');
+      if (isPipeline) {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function addStageInput() {
+      const list = document.getElementById('stagesList');
+      const count = list.children.length + 1;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = `階段 ${count}：新步驟`;
+      input.className = 'stage-input w-full px-3 py-1.5 rounded-lg border text-xs';
+      input.style.backgroundColor = 'var(--card-bg)';
+      input.style.borderColor = 'var(--card-border)';
+      list.appendChild(input);
+    }
+
+    function handleAddTaskSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('newTaskTitle').value.trim();
+      const startTime = document.getElementById('newTaskStartTime').value.trim();
+      const type = document.querySelector('input[name="newTaskType"]:checked').value;
+      const stampText = document.getElementById('newTaskStampText').value;
+
+      if (!title) return;
+
+      const newTask = {
+        id: 'task_' + Date.now(),
+        classId: appState.currentClassId,
+        title: title,
+        startTime: startTime,
+        type: type,
+        stampText: stampText,
+        createdAt: Date.now()
+      };
+
+      if (type === 'single') {
+        newTask.states = {};
+      } else {
+        const stageInputs = document.querySelectorAll('.stage-input');
+        newTask.stages = [];
+        stageInputs.forEach((inp, idx) => {
+          const nameStr = inp.value.trim() || `階段 ${idx + 1}`;
+          newTask.stages.push({
+            id: 'stg_' + idx,
+            name: nameStr
+          });
+        });
+        newTask.currentStageIndex = 0;
+        newTask.pipelineStates = {};
+      }
+
+      appState.tasks.unshift(newTask);
+      saveData();
+      closeModal();
+      showToast('成功建立新任務卡片！', 'success');
+    }
+
+    // Class & Roster Management Modal
+    function openClassManageModal() {
+      const modalBox = document.getElementById('modalBox');
+      const curClass = getCurrentClassObj();
+
+      let namesText = '';
+      for (let i = 1; i <= curClass.maxSeats; i++) {
+        namesText += (curClass.studentNames?.[i] || '') + '\n';
+      }
+
+      modalBox.innerHTML = `
+        <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--card-border);">
+          <h3 class="font-extrabold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> 班級與名單管理
+          </h3>
+          <button onclick="closeModal()" class="p-1 opacity-50 hover:opacity-100">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleSaveClassRoster(event)" class="space-y-4 overflow-y-auto custom-scrollbar pr-1 flex-1">
+          <div>
+            <label class="block text-xs font-bold mb-1">當前編輯班級</label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="editClassName" value="${escapeHTML(curClass.name)}" required
+                     class="flex-1 px-3 py-2 rounded-xl border text-sm font-bold focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+              <button type="button" onclick="openAddClassModal()" class="px-3 py-2 text-xs font-bold rounded-xl transition themed-btn-sub flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> 新增班級
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">班級人數</label>
+            <input type="number" id="rosterMaxSeats" min="1" max="60" value="${curClass.maxSeats}" required
+                   class="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">學生姓名對應（每行代表 1 位學生，按座號順序排列）</label>
+            <textarea id="rosterNamesInput" rows="7" placeholder="第1位姓名&#10;第2位姓名&#10;第3位姓名..."
+                      class="w-full px-3 py-2 rounded-xl border text-xs font-mono focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">${escapeHTML(namesText.trim())}</textarea>
+            <p class="text-[11px] opacity-60 mt-1">換行代表下一個座號：1號 王小明（換行）2號 陳美玲...</p>
+          </div>
+
+          <div class="flex justify-between items-center pt-2 border-t" style="border-color: var(--card-border);">
+            ${appState.classes.length > 1 ? `
+              <button type="button" onclick="deleteCurrentClass()" class="text-xs text-rose-600 font-bold hover:underline">
+                <i class="fa-solid fa-trash-can mr-1"></i>刪除此班級
+              </button>
+            ` : '<div></div>'}
+            <div class="flex gap-2">
+              <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+              <button type="submit" class="themed-btn-primary px-4 py-2 text-xs font-black shadow-md">儲存班級設定</button>
+            </div>
+          </div>
+        </form>
+      `;
+      showModal();
+    }
+
+    function openAddClassModal() {
+      const modalBox = document.getElementById('modalBox');
+      const defaultName = `${800 + appState.classes.length + 1} 班`;
+
+      modalBox.innerHTML = `
+        <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--card-border);">
+          <h3 class="font-extrabold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-school" style="color: var(--primary);"></i> 建立新班級
+          </h3>
+          <button onclick="closeModal()" class="p-1 opacity-50 hover:opacity-100">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form onsubmit="handleCreateClassSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold mb-1">新班級名稱</label>
+            <input type="text" id="newClassName" value="${defaultName}" required placeholder="例如：803 班、九年級國文社團..." 
+                   class="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">預設人數</label>
+            <input type="number" id="newClassMaxSeats" min="1" max="60" value="30" required
+                   class="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none" style="background-color: var(--seat-bg); border-color: var(--seat-border);">
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t mt-4" style="border-color: var(--card-border);">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+            <button type="submit" class="themed-btn-primary px-4 py-2 text-xs font-black shadow-md">建立並切換</button>
+          </div>
+        </form>
+      `;
+      showModal();
+    }
+
+    function handleCreateClassSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newClassName').value.trim();
+      const seats = parseInt(document.getElementById('newClassMaxSeats').value, 10) || 30;
+
+      if (!name) return;
+
+      const newId = 'class_' + Date.now();
+      const newClassObj = {
+        id: newId,
+        name: name,
+        maxSeats: Math.max(1, Math.min(60, seats)),
+        studentNames: {}
+      };
+
+      appState.classes.push(newClassObj);
+      appState.currentClassId = newId;
+
+      saveData();
+      closeModal();
+      showToast(`成功建立新班級「${name}」！`, 'success');
+    }
+
+    function handleSaveClassRoster(e) {
+      e.preventDefault();
+      const curClass = getCurrentClassObj();
+      const newName = document.getElementById('editClassName').value.trim() || curClass.name;
+      const newMax = parseInt(document.getElementById('rosterMaxSeats').value, 10) || 30;
+      const rawNames = document.getElementById('rosterNamesInput').value.split('\n');
+
+      curClass.name = newName;
+      curClass.maxSeats = Math.max(1, Math.min(60, newMax));
+      curClass.studentNames = {};
+
+      rawNames.forEach((line, idx) => {
+        const name = line.trim();
+        if (name && (idx + 1) <= curClass.maxSeats) {
+          curClass.studentNames[idx + 1] = name;
+        }
+      });
+
+      saveData();
+      closeModal();
+      showToast('班級與名單設定已更新！', 'success');
+    }
+
+    function deleteCurrentClass() {
+      if (appState.classes.length <= 1) return;
+      const curClass = getCurrentClassObj();
+
+      const modalBox = document.getElementById('modalBox');
+      modalBox.innerHTML = `
+        <div class="text-center py-4">
+          <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-xl">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+          <h3 class="font-extrabold text-base mb-1">確定要刪除「${escapeHTML(curClass.name)}」？</h3>
+          <p class="text-xs opacity-60 mb-6">這將會同步刪除該班級的所有任務與集章資料。</p>
+          <div class="flex justify-center gap-3">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+            <button onclick="executeDeleteCurrentClass()" class="px-4 py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md">確認刪除</button>
+          </div>
+        </div>
+      `;
+      showModal();
+    }
+
+    function executeDeleteCurrentClass() {
+      const deletedId = appState.currentClassId;
+      appState.classes = appState.classes.filter(c => c.id !== deletedId);
+      appState.tasks = appState.tasks.filter(t => t.classId !== deletedId);
+      appState.currentClassId = appState.classes[0].id;
+
+      saveData();
+      closeModal();
+      showToast('已刪除該班級資料', 'info');
+    }
+
+    function confirmResetAll() {
+      const modalBox = document.getElementById('modalBox');
+      modalBox.innerHTML = `
+        <div class="text-center py-4">
+          <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 class="font-extrabold text-base mb-1">確定要清除全系統所有資料？</h3>
+          <p class="text-xs opacity-60 mb-6">這將會清空所有班級與任務進度，回復為系統初始狀態。</p>
+          <div class="flex justify-center gap-3">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold opacity-60 hover:opacity-100">取消</button>
+            <button onclick="executeResetAll()" class="px-4 py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md">確認清空</button>
+          </div>
+        </div>
+      `;
+      showModal();
+    }
+
+    function executeResetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState = getDefaultSampleData();
+      saveData();
+      closeModal();
+      showToast('所有班級與任務資料已重置', 'info');
+    }
+
+    // Escape HTML Helper
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Keydown listener for Esc key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (currentFocusedTaskId) {
+          closeFocusModal();
+        } else {
+          closeModal();
+        }
+      }
+    });
+
+    // Application Initialization
+    window.onload = function() {
+      loadSavedData();
+      renderApp();
+    };
+  </script>
+</body>
+</html>
